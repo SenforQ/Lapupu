@@ -1,0 +1,69 @@
+# Lapupu Terms of Service
+
+Last Updated: [Current Date]
+
+## 1. Acceptance of Terms
+
+By accessing or using Lapupu's services, including our mobile application and website (collectively, the "Services"), you agree to be bound by these Terms of Service. If you do not agree to these Terms, you may not access or use our Services.
+
+## 2. Changes to Terms
+
+We reserve the right to modify these Terms at any time. We will provide notice of any material changes by posting the updated Terms on our Services or by other reasonable means. Your continued use of our Services after such modifications constitutes your acceptance of the modified Terms.
+
+## 3. Privacy Policy
+
+Your use of our Services is also subject to our Privacy Policy, which describes how we collect, use, and share information about you. By using our Services, you consent to the data practices described in our Privacy Policy.
+
+## 4. Intellectual Property Rights
+
+Our Services and all content, features, and functionality thereof, including but not limited to text, graphics, logos, icons, images, audio clips, and software, are owned by Lapupu or its licensors and are protected by copyright, trademark, and other intellectual property laws.
+
+## 5. User Content
+
+You retain ownership of any content you submit, post, or display on or through our Services ("User Content"). By submitting User Content, you grant us a worldwide, non-exclusive, royalty-free license to use, reproduce, modify, adapt, publish, translate, distribute, and display such User Content in connection with providing and promoting our Services.
+
+## 6. Prohibited Conduct
+
+You agree not to:
+- Use our Services for any illegal purpose or in violation of any laws
+- Post or transmit harmful, threatening, abusive, harassing, defamatory, or otherwise objectionable content
+- Impersonate any person or entity or misrepresent your affiliation
+- Interfere with or disrupt our Services or servers
+- Attempt to gain unauthorized access to any portion of our Services
+- Use our Services to distribute unsolicited promotional content or spam
+
+## 7. Content Moderation
+
+We reserve the right, but are not obligated, to monitor and review User Content. We may remove or refuse to post any User Content that violates these Terms or that we find objectionable for any reason, without prior notice.
+
+## 8. Third-Party Links and Services
+
+Our Services may contain links to third-party websites or services. We are not responsible for the content or practices of these third-party sites and services, and your use of them is at your own risk.
+
+## 9. Termination
+
+We reserve the right to suspend or terminate your access to our Services at any time, without prior notice, for any reason, including if we believe you have violated these Terms.
+
+## 10. Disclaimer of Warranties
+
+OUR SERVICES ARE PROVIDED "AS IS" AND "AS AVAILABLE" WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED. TO THE FULLEST EXTENT PERMITTED BY LAW, WE DISCLAIM ALL WARRANTIES, INCLUDING IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.
+
+## 11. Limitation of Liability
+
+TO THE MAXIMUM EXTENT PERMITTED BY LAW, IN NO EVENT SHALL LAPUPU OR ITS AFFILIATES BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, ARISING OUT OF OR RELATING TO YOUR USE OF OR INABILITY TO USE OUR SERVICES.
+
+## 12. Indemnification
+
+You agree to indemnify and hold harmless Lapupu and its officers, directors, employees, and agents from any claims, damages, losses, liabilities, and expenses (including legal fees) arising out of or relating to your use of our Services or violation of these Terms.
+
+## 13. Governing Law
+
+These Terms shall be governed by and construed in accordance with the laws of [Jurisdiction], without regard to its conflict of law provisions.
+
+## 14. Dispute Resolution
+
+Any dispute arising out of or relating to these Terms or our Services shall be resolved through binding arbitration in accordance with the rules of [Arbitration Association]. The arbitration shall be conducted in [City, State/Country].
+
+## 15. Severability
+
+If any provision of these Terms is found to be unenforceable or invalid, that provision shall be limited or eliminated to the minimum extent necessary, and the remaining provisions shall remain in full force and effect. 

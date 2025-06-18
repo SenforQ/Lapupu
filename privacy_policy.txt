@@ -1,0 +1,63 @@
+# Lapupu Privacy Policy
+
+Last Updated: [Current Date]
+
+## 1. Information We Collect
+
+We collect information that you provide directly to us, such as personal information (including name, email address, and phone number), profile information, content you share, and communications you send to us. We also automatically collect certain information when you use our services, including device information, usage data, and location information.
+
+## 2. How We Use Your Information
+
+We use the information we collect to provide, maintain, and improve our services, communicate with you, personalize your experience, develop new features, ensure safety and security, and comply with legal obligations.
+
+## 3. Information Sharing and Disclosure
+
+We may share your information with third-party service providers who perform services on our behalf, business partners, other users (as directed by you), and as required by law or to protect rights and interests.
+
+## 4. Data Retention
+
+We retain your information for as long as necessary to provide our services and fulfill the purposes outlined in this Privacy Policy, unless a longer retention period is required by law.
+
+## 5. Security Measures
+
+We implement reasonable security measures designed to protect your information from unauthorized access, disclosure, alteration, and destruction. However, no security system is impenetrable, and we cannot guarantee the security of our systems.
+
+## 6. Children's Privacy
+
+Our services are not directed to children under the age of 13, and we do not knowingly collect personal information from children under 13. If we learn we have collected personal information from a child under 13, we will delete that information.
+
+## 7. International Data Transfers
+
+Your information may be transferred to, stored, and processed in countries other than your country of residence, where privacy laws may not be as protective as those in your jurisdiction.
+
+## 8. Third-Party Links and Services
+
+Our services may contain links to third-party websites or services. We are not responsible for the privacy practices or content of these third parties, and we encourage you to read their privacy policies.
+
+## 9. Cookies and Similar Technologies
+
+We use cookies and similar technologies to collect information about your browsing activities, remember your preferences, and improve your experience. You can adjust your browser settings to refuse cookies, but this may limit your ability to use our services.
+
+## 10. Your Rights and Choices
+
+Depending on your location, you may have certain rights regarding your personal information, including the right to access, correct, delete, restrict processing, or object to processing. To exercise these rights, please contact us using the information provided below.
+
+## 11. Changes to This Privacy Policy
+
+We may modify this Privacy Policy from time to time. If we make material changes, we will notify you by email or through our services prior to the changes becoming effective.
+
+## 12. Contact Information
+
+If you have questions or concerns about this Privacy Policy or our data practices, please contact us at: [contact email].
+
+## 13. Legal Basis for Processing (EU/EEA Users)
+
+If you are located in the EU or EEA, we collect and process your personal information based on legitimate interests, consent, contractual necessity, and compliance with legal obligations.
+
+## 14. Data Protection Officer
+
+We have appointed a Data Protection Officer who can be contacted regarding any questions about our data processing practices: [DPO contact email].
+
+## 15. California Privacy Rights
+
+California residents may have additional rights regarding their personal information under California law, including the right to know what personal information is collected, the right to request deletion of personal information, and the right to opt-out of the sale of personal information. 
