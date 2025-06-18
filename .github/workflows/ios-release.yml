@@ -94,7 +94,7 @@ jobs:
 
       - name: Upload to App Store using altool
         env:
-          IPA_PATH: "build/ios/ipa/labubu.ipa"
+          IPA_PATH: "build/ios/ipa/riize.ipa"
           APPLE_ID: "wuhongchuan@tydemedia.shop"
           APP_SPECIFIC_PASSWORD: "tuxr-cywy-koeh-vach"
         run: |
