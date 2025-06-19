@@ -5,6 +5,7 @@ import 'terms_page.dart';
 import 'privacy_page.dart';
 import 'about_page.dart';
 import 'edit_profile_page.dart';
+import 'ai_outfit_assistant_page.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -189,6 +190,23 @@ class _ProfilePageState extends State<ProfilePage> {
                           context,
                           MaterialPageRoute(
                               builder: (context) => const AboutPage()),
+                        );
+                      },
+                    ),
+
+                    const Divider(
+                        height: 1, thickness: 1, color: Color(0xFFEEEEEE)),
+
+                    // AI Outfit Assistant
+                    _buildListItem(
+                      icon: 'lib/assets/Photo/rob_2025_6_19.png',
+                      title: 'AI Outfit Assistant',
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const AiOutfitAssistantPage(),
+                          ),
                         );
                       },
                     ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'home_page.dart';
 import 'like_page.dart';
 import 'message_page.dart';
+import 'clothing_page.dart';
 import 'profile_page.dart';
 
 class MainPage extends StatefulWidget {
@@ -17,6 +18,7 @@ class _MainPageState extends State<MainPage> {
   final List<Widget> _pages = [
     const HomePage(),
     const LikePage(),
+    const ClothingPage(),
     const MessagePage(),
     const ProfilePage(),
   ];
@@ -78,6 +80,19 @@ class _MainPageState extends State<MainPage> {
                 height: 24,
               ),
               label: 'Like',
+            ),
+            BottomNavigationBarItem(
+              icon: Image.asset(
+                'lib/assets/Photo/clothing_n_2025_6_13.png',
+                width: 24,
+                height: 24,
+              ),
+              activeIcon: Image.asset(
+                'lib/assets/Photo/clothing_s_2025_6_13.png',
+                width: 24,
+                height: 24,
+              ),
+              label: 'Clothing',
             ),
             BottomNavigationBarItem(
               icon: Image.asset(

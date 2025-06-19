@@ -13,7 +13,7 @@ class MessagePage extends StatefulWidget {
 }
 
 class _MessagePageState extends State<MessagePage>
-    with AutomaticKeepAliveClientMixin {
+    with AutomaticKeepAliveClientMixin, WidgetsBindingObserver {
   // 是否有历史消息
   bool _hasHistory = false;
   // 聊天历史
@@ -22,41 +22,75 @@ class _MessagePageState extends State<MessagePage>
   late Character _randomCharacter;
   // 加载状态
   bool _isLoading = true;
+  // 是否正在加载数据（防重复加载）
+  bool _isLoadingData = false;
   // 刷新指示器的key
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
       GlobalKey<RefreshIndicatorState>();
 
   @override
-  bool get wantKeepAlive => false; // 不保持状态，每次都重新加载
+  bool get wantKeepAlive => true; // 保持页面状态
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _randomCharacter = _getRandomCharacter();
     _loadChatHistories();
   }
 
   @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    // 当应用从后台回到前台时，刷新聊天记录
+    if (state == AppLifecycleState.resumed) {
+      _loadChatHistories();
+    }
+  }
+
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // 每次依赖变化（如页面重新显示）时重新加载数据
-    _loadChatHistories();
+    // 只在首次加载时执行，避免重复加载
+    if (!_isLoadingData && _chatHistories.isEmpty) {
+      _loadChatHistories();
+    }
   }
 
   // 加载聊天历史
   Future<void> _loadChatHistories() async {
+    // 防止重复加载
+    if (_isLoadingData) return;
+
     setState(() {
+      _isLoadingData = true;
       _isLoading = true;
     });
 
-    final histories = await ChatHistory.getAllChatHistories();
+    try {
+      final histories = await ChatHistory.getAllChatHistories();
 
-    if (mounted) {
-      setState(() {
-        _chatHistories = histories;
-        _hasHistory = histories.isNotEmpty;
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _chatHistories = histories;
+          _hasHistory = histories.isNotEmpty;
+          _isLoading = false;
+          _isLoadingData = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _isLoadingData = false;
+        });
+      }
     }
   }
 

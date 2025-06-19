@@ -23,6 +23,13 @@ class TabBarController: UITabBarController {
             selectedImage: UIImage(named: "like_s_2025_6_13")?.withRenderingMode(.alwaysOriginal)
         )
         
+        let clothingVC = UIViewController()
+        clothingVC.tabBarItem = UITabBarItem(
+            title: nil,
+            image: UIImage(named: "clothing_n_2025_6_13")?.withRenderingMode(.alwaysOriginal),
+            selectedImage: UIImage(named: "clothing_s_2025_6_13")?.withRenderingMode(.alwaysOriginal)
+        )
+        
         let messageVC = UIViewController()
         messageVC.tabBarItem = UITabBarItem(
             title: nil,
@@ -40,6 +47,7 @@ class TabBarController: UITabBarController {
         let navigationControllers = [
             UINavigationController(rootViewController: homeVC),
             UINavigationController(rootViewController: likeVC),
+            UINavigationController(rootViewController: clothingVC),
             UINavigationController(rootViewController: messageVC),
             UINavigationController(rootViewController: meVC)
         ]
