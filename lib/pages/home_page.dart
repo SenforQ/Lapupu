@@ -3,11 +3,10 @@ import 'package:flutter/cupertino.dart';
 import 'dart:ui';
 import 'dart:math';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:audioplayers/audioplayers.dart';
 import '../models/character_model.dart';
 import 'character_detail_page.dart';
 import 'report_page.dart';
-import 'package:just_audio/just_audio.dart';
-import 'package:just_audio_background/just_audio_background.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -17,7 +16,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   // 滚动控制器
   final ScrollController _scrollController = ScrollController();
   // 导航栏透明度
@@ -36,9 +35,11 @@ class _HomePageState extends State<HomePage>
   bool _isLoading = true;
 
   // 音频播放器
-  late AudioPlayer _audioPlayer;
+  final AudioPlayer _audioPlayer = AudioPlayer();
   // 是否正在播放音乐
   bool _isPlaying = false;
+  // 是否正在加载音频
+  bool _isLoadingAudio = false;
   // 是否每次都显示提示
   bool _shouldShowPrompt = true;
   // 旋转动画控制器
@@ -47,6 +48,7 @@ class _HomePageState extends State<HomePage>
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     // 监听滚动事件，更新导航栏透明度
     _scrollController.addListener(_updateNavbarOpacity);
     // 加载被拉黑的用户和初始化数据
@@ -62,6 +64,7 @@ class _HomePageState extends State<HomePage>
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     // 销毁滚动控制器
     _scrollController.removeListener(_updateNavbarOpacity);
     _scrollController.dispose();
@@ -72,141 +75,13 @@ class _HomePageState extends State<HomePage>
     super.dispose();
   }
 
-  // 初始化音频播放器
-  Future<void> _initAudioPlayer() async {
-    _audioPlayer = AudioPlayer();
-    // 加载用户偏好设置
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _shouldShowPrompt = prefs.getBool('show_music_prompt') ?? true;
-    });
-
-    // 监听播放状态变化
-    _audioPlayer.playerStateStream.listen((state) {
-      if (state.playing) {
-        _rotationController.repeat(); // 开始旋转
-      } else {
-        _rotationController.stop(); // 停止旋转
-      }
-    });
-  }
-
-  // 播放背景音乐
-  Future<void> _playBackgroundMusic() async {
-    if (!_isPlaying) {
-      try {
-        // 创建带有MediaItem标签的音频源
-        final audioSource = AudioSource.asset(
-          'lib/assets/audio/home_background_music_2025_6_18.mp3',
-          tag: MediaItem(
-            id: 'background_music',
-            album: 'Riize',
-            title: 'Background Music',
-            artUri:
-                Uri.parse('asset://lib/assets/Photo/home_music_2025_6_18.png'),
-          ),
-        );
-
-        // 设置音频源
-        await _audioPlayer.setAudioSource(audioSource);
-        // 设置循环播放
-        await _audioPlayer.setLoopMode(LoopMode.all);
-        // 开始播放
-        await _audioPlayer.play();
-        setState(() {
-          _isPlaying = true;
-        });
-      } catch (e) {
-        print('Error playing music: $e');
-      }
-    } else {
-      // 如果正在播放，则暂停
-      await _audioPlayer.pause();
-      setState(() {
-        _isPlaying = false;
-      });
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    // 简化生命周期管理，只在应用完全关闭时停止音乐
+    if (state == AppLifecycleState.detached) {
+      _audioPlayer.stop();
     }
-  }
-
-  // 显示音乐播放提示对话框
-  void _showMusicPrompt() {
-    bool tempShouldShowPrompt = _shouldShowPrompt;
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
-              title: const Text('Background Music'),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                      'This app features AI-generated background music. Would you like to play it?'),
-                  const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      Checkbox(
-                        value: !tempShouldShowPrompt,
-                        onChanged: (bool? value) {
-                          setState(() {
-                            tempShouldShowPrompt = !value!;
-                          });
-                        },
-                      ),
-                      const Text('Don\'t show this again'),
-                    ],
-                  ),
-                ],
-              ),
-              actions: <Widget>[
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: const Text('Cancel'),
-                ),
-                TextButton(
-                  onPressed: () async {
-                    Navigator.of(context).pop();
-                    // 保存用户选择
-                    final prefs = await SharedPreferences.getInstance();
-                    await prefs.setBool(
-                        'show_music_prompt', tempShouldShowPrompt);
-                    setState(() {
-                      _shouldShowPrompt = tempShouldShowPrompt;
-                    });
-                    // 播放音乐
-                    _playBackgroundMusic();
-                  },
-                  child: const Text('Play'),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
-  }
-
-  // 处理音乐按钮点击
-  void _handleMusicButtonTap() async {
-    if (_shouldShowPrompt) {
-      _showMusicPrompt();
-    } else {
-      _playBackgroundMusic();
-    }
-  }
-
-  // 加载被拉黑的用户
-  Future<void> _loadBlockedUsers() async {
-    final prefs = await SharedPreferences.getInstance();
-    final blockedUsers = prefs.getStringList('blocked_users') ?? [];
-    setState(() {
-      _blockedUserIds = Set.from(blockedUsers);
-    });
   }
 
   // 更新导航栏透明度
@@ -763,6 +638,201 @@ class _HomePageState extends State<HomePage>
       _preSelectRandomPhotos();
       // 数据加载完成
       _isLoading = false;
+    });
+  }
+
+  // 初始化音频播放器
+  Future<void> _initAudioPlayer() async {
+    try {
+      // 加载用户偏好设置
+      final prefs = await SharedPreferences.getInstance();
+      setState(() {
+        _shouldShowPrompt = prefs.getBool('show_music_prompt') ?? true;
+      });
+
+      print('Audio player initialized successfully');
+    } catch (e) {
+      print('Error initializing audio player: $e');
+    }
+  }
+
+  // 播放背景音乐
+  Future<void> _playBackgroundMusic() async {
+    // 防止重复操作
+    if (_isLoadingAudio) return;
+
+    setState(() {
+      _isLoadingAudio = true;
+    });
+
+    try {
+      print('Starting to play background music...');
+
+      // 检查当前播放状态
+      final currentState = _audioPlayer.state;
+      print('Current audio player state: $currentState');
+
+      if (currentState == PlayerState.playing) {
+        // 如果正在播放，则暂停
+        print('Pausing music...');
+        await _audioPlayer.pause();
+        setState(() {
+          _isPlaying = false;
+          _isLoadingAudio = false;
+        });
+        _rotationController.stop(); // 停止旋转
+        return;
+      }
+
+      // 如果已经暂停，则恢复播放
+      if (currentState == PlayerState.paused) {
+        print('Resuming music...');
+        await _audioPlayer.resume();
+        setState(() {
+          _isPlaying = true;
+          _isLoadingAudio = false;
+        });
+        _rotationController.repeat(); // 开始旋转
+        return;
+      }
+
+      // 如果是停止状态，则开始新的播放
+      setState(() {
+        _isPlaying = true;
+      });
+
+      // 设置音频配置
+      print('Setting audio configuration...');
+      await _audioPlayer.setVolume(1.0);
+      await _audioPlayer.setReleaseMode(ReleaseMode.loop);
+
+      // 播放音频文件
+      print('Playing audio file: audio/home_background_music_2025_6_18.mp3');
+      await _audioPlayer
+          .play(AssetSource('audio/home_background_music_2025_6_18.mp3'));
+
+      print('Audio playback started successfully');
+
+      // 监听播放完成
+      _audioPlayer.onPlayerComplete.listen((_) {
+        print('Background music playback completed');
+        if (mounted) {
+          setState(() {
+            _isPlaying = false;
+            _isLoadingAudio = false;
+          });
+          _rotationController.stop();
+        }
+      });
+
+      // 监听播放状态变化
+      _audioPlayer.onPlayerStateChanged.listen((PlayerState state) {
+        print('Background music player state changed: $state');
+        if (mounted) {
+          setState(() {
+            _isPlaying = state == PlayerState.playing;
+            _isLoadingAudio = false;
+          });
+
+          if (state == PlayerState.playing) {
+            _rotationController.repeat(); // 开始旋转
+          } else {
+            _rotationController.stop(); // 停止旋转
+          }
+        }
+      });
+
+      setState(() {
+        _isLoadingAudio = false;
+      });
+    } catch (e) {
+      print('Error playing music: $e');
+      setState(() {
+        _isPlaying = false;
+        _isLoadingAudio = false;
+      });
+      _rotationController.stop();
+    }
+  }
+
+  // 显示音乐播放提示对话框
+  void _showMusicPrompt() {
+    bool tempShouldShowPrompt = _shouldShowPrompt;
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: const Text('Background Music'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                      'This app features AI-generated background music. Would you like to play it?'),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Checkbox(
+                        value: !tempShouldShowPrompt,
+                        onChanged: (bool? value) {
+                          setState(() {
+                            tempShouldShowPrompt = !value!;
+                          });
+                        },
+                      ),
+                      const Text('Don\'t show this again'),
+                    ],
+                  ),
+                ],
+              ),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('Cancel'),
+                ),
+                TextButton(
+                  onPressed: () async {
+                    Navigator.of(context).pop();
+                    // 保存用户选择
+                    final prefs = await SharedPreferences.getInstance();
+                    await prefs.setBool(
+                        'show_music_prompt', tempShouldShowPrompt);
+                    setState(() {
+                      _shouldShowPrompt = tempShouldShowPrompt;
+                    });
+                    // 播放音乐
+                    _playBackgroundMusic();
+                  },
+                  child: const Text('Play'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  // 处理音乐按钮点击
+  void _handleMusicButtonTap() async {
+    if (_shouldShowPrompt) {
+      _showMusicPrompt();
+    } else {
+      _playBackgroundMusic();
+    }
+  }
+
+  // 加载被拉黑的用户
+  Future<void> _loadBlockedUsers() async {
+    final prefs = await SharedPreferences.getInstance();
+    final blockedUsers = prefs.getStringList('blocked_users') ?? [];
+    setState(() {
+      _blockedUserIds = Set.from(blockedUsers);
     });
   }
 

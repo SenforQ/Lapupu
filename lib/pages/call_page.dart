@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'dart:math';
-import 'package:just_audio/just_audio.dart';
-import 'package:just_audio_background/just_audio_background.dart';
+import 'package:audioplayers/audioplayers.dart';
 import '../models/character_model.dart';
 
 class CallPage extends StatefulWidget {
@@ -13,28 +11,32 @@ class CallPage extends StatefulWidget {
   State<CallPage> createState() => _CallPageState();
 }
 
-class _CallPageState extends State<CallPage>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _shakeController;
-  late Animation<double> _shakeAnimationX;
-  late Animation<double> _shakeAnimationY;
+class _CallPageState extends State<CallPage> with TickerProviderStateMixin {
+  // 音频播放器
   final AudioPlayer _audioPlayer = AudioPlayer();
+
+  // 背景图片路径
+  late String _backgroundImage;
+  // 是否已销毁
   bool _isDisposed = false;
-  int _rippleKey = 0; // 用于强制重建水波纹动画
-  late String _backgroundImage; // 存储随机选择的背景图片路径
+  // 抖动动画控制器
+  late AnimationController _shakeController;
+  // X轴抖动动画
+  late Animation<double> _shakeAnimationX;
+  // Y轴抖动动画
+  late Animation<double> _shakeAnimationY;
+  // 水波纹动画key
+  int _rippleKey = 0;
+  // 是否正在响铃
+  bool _isRinging = false;
 
   @override
   void initState() {
     super.initState();
+    // 设置背景图片
+    _backgroundImage = widget.character.riizeUserIcon;
 
-    // 在初始化时随机选择背景图片
-    final random = Random();
-    _backgroundImage = widget.character.riizeShowPhotoArray.isEmpty
-        ? widget.character.riizeUserIcon
-        : widget.character.riizeShowPhotoArray[
-            random.nextInt(widget.character.riizeShowPhotoArray.length)];
-
-    // 初始化抖动动画，更快的频率
+    // 初始化抖动动画控制器
     _shakeController = AnimationController(
       duration: const Duration(milliseconds: 100),
       vsync: this,
@@ -76,23 +78,48 @@ class _CallPageState extends State<CallPage>
     });
   }
 
+  // 播放通话音效
   Future<void> _playCallSound() async {
-    try {
-      // 创建音频源
-      final audioSource = AudioSource.asset(
-        'lib/assets/audio/chat_call_2025_6_18.mp3',
-        tag: MediaItem(
-          id: 'call_sound',
-          album: 'Riize',
-          title: 'Call Sound',
-        ),
-      );
+    setState(() {
+      _isRinging = true;
+    });
 
-      // 设置音频源并播放
-      await _audioPlayer.setAudioSource(audioSource);
-      await _audioPlayer.play();
+    try {
+      print('Starting to play call sound...');
+
+      // 设置音频配置
+      print('Setting call sound configuration...');
+      await _audioPlayer.setVolume(1.0);
+      await _audioPlayer.setReleaseMode(ReleaseMode.loop);
+
+      // 播放通话音效
+      print('Playing call sound file: audio/chat_call_2025_6_18.mp3');
+      await _audioPlayer.play(AssetSource('audio/chat_call_2025_6_18.mp3'));
+
+      print('Call sound playback started successfully');
+
+      // 监听播放完成
+      _audioPlayer.onPlayerComplete.listen((_) {
+        print('Call sound playback completed');
+        if (mounted) {
+          setState(() => _isRinging = false);
+        }
+      });
+
+      // 监听播放状态变化
+      _audioPlayer.onPlayerStateChanged.listen((PlayerState state) {
+        print('Call sound player state changed: $state');
+        if (mounted) {
+          setState(() {
+            _isRinging = state == PlayerState.playing;
+          });
+        }
+      });
     } catch (e) {
       print('Error playing call sound: $e');
+      if (mounted) {
+        setState(() => _isRinging = false);
+      }
     }
   }
 
@@ -191,9 +218,9 @@ class _CallPageState extends State<CallPage>
             bottom: 80,
             child: Column(
               children: [
-                const Text(
-                  'On the line...',
-                  style: TextStyle(
+                Text(
+                  _isRinging ? 'Ringing...' : 'On the line...',
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
