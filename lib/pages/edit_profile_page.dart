@@ -1,7 +1,9 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user_model.dart';
+import 'vip_page.dart';
 
 class EditProfilePage extends StatefulWidget {
   final UserModel user;
@@ -54,7 +56,85 @@ class _EditProfilePageState extends State<EditProfilePage> {
     super.dispose();
   }
 
+  Future<bool> _checkVipStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+    final vipExpiry = prefs.getInt('vip_expiry_timestamp') ?? 0;
+    final currentTime = DateTime.now().millisecondsSinceEpoch;
+    return vipExpiry > currentTime;
+  }
+
+  Future<void> _showVipRequiredDialog() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text(
+            'VIP Required',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          content: const Text(
+            'This feature is only available for VIP members. Please upgrade to VIP to edit your profile.',
+            style: TextStyle(fontSize: 16),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text(
+                'Cancel',
+                style: TextStyle(
+                  color: Colors.grey,
+                  fontSize: 16,
+                ),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF4ECDC4),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: const Text(
+                'Go',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const VipPage(),
+                  ),
+                );
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Future<void> _saveChanges() async {
+    // 检查VIP状态
+    final isVip = await _checkVipStatus();
+
+    if (!isVip) {
+      // 如果不是VIP，显示提示对话框
+      await _showVipRequiredDialog();
+      return;
+    }
+
+    // VIP用户可以保存数据
     // 更新用户数据
     widget.user.username = _usernameController.text;
     widget.user.bio = _bioController.text;
@@ -70,6 +150,14 @@ class _EditProfilePageState extends State<EditProfilePage> {
     }
 
     if (mounted) {
+      // 显示保存成功提示
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Profile saved successfully!'),
+          backgroundColor: Color(0xFF4ECDC4),
+          duration: Duration(seconds: 2),
+        ),
+      );
       Navigator.pop(context, true);
     }
   }

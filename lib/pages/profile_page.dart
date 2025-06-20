@@ -6,6 +6,8 @@ import 'privacy_page.dart';
 import 'about_page.dart';
 import 'edit_profile_page.dart';
 import 'ai_outfit_assistant_page.dart';
+import 'vip_page.dart';
+import 'wallet_page.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -145,10 +147,55 @@ class _ProfilePageState extends State<ProfilePage> {
               // 空白间隔
               const SliverToBoxAdapter(child: SizedBox(height: 80)),
 
+              // VIP Club 入口
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 15),
+                  child: _buildVipClubWidget(),
+                ),
+              ),
+
+              // 列表项间隔
+              const SliverToBoxAdapter(child: SizedBox(height: 20)),
+
               // 列表项
               SliverToBoxAdapter(
                 child: Column(
                   children: [
+                    // AI Outfit Assistant - 放在第一位
+                    _buildListItem(
+                      icon: 'lib/assets/Photo/rob_2025_6_19.png',
+                      title: 'AI Outfit Assistant',
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const AiOutfitAssistantPage(),
+                          ),
+                        );
+                      },
+                    ),
+
+                    const Divider(
+                        height: 1, thickness: 1, color: Color(0xFFEEEEEE)),
+
+                    // Wallet - 新增
+                    _buildListItem(
+                      icon: 'lib/assets/Photo/me_wallet_2025_6_19.png',
+                      title: 'Wallet',
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const WalletPage(),
+                          ),
+                        );
+                      },
+                    ),
+
+                    const Divider(
+                        height: 1, thickness: 1, color: Color(0xFFEEEEEE)),
+
                     // User Contract
                     _buildListItem(
                       icon: 'lib/assets/Photo/me_user_2025_6_13.png',
@@ -190,23 +237,6 @@ class _ProfilePageState extends State<ProfilePage> {
                           context,
                           MaterialPageRoute(
                               builder: (context) => const AboutPage()),
-                        );
-                      },
-                    ),
-
-                    const Divider(
-                        height: 1, thickness: 1, color: Color(0xFFEEEEEE)),
-
-                    // AI Outfit Assistant
-                    _buildListItem(
-                      icon: 'lib/assets/Photo/rob_2025_6_19.png',
-                      title: 'AI Outfit Assistant',
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const AiOutfitAssistantPage(),
-                          ),
                         );
                       },
                     ),
@@ -253,6 +283,60 @@ class _ProfilePageState extends State<ProfilePage> {
         },
       );
     }
+  }
+
+  Widget _buildVipClubWidget() {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const VipPage(),
+          ),
+        );
+      },
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          width: MediaQuery.of(context).size.width - 30,
+          child: Stack(
+            children: [
+              // 背景图片，使用Image.asset以保持原始宽高比
+              Image.asset(
+                'lib/assets/Photo/me_vip_club_2025_6_19.png',
+                width: MediaQuery.of(context).size.width - 30,
+                fit: BoxFit.fitWidth,
+              ),
+
+              // Join按钮
+              Positioned(
+                right: 12,
+                top: 0,
+                bottom: 0,
+                child: Center(
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const VipPage(),
+                        ),
+                      );
+                    },
+                    child: Image.asset(
+                      'lib/assets/Photo/me_vip_join_2025_6_19.png',
+                      width: 82,
+                      height: 32,
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   Widget _buildListItem({

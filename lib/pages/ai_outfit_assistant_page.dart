@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/chat_model.dart';
+import 'wallet_page.dart';
 
 class AiOutfitAssistantPage extends StatefulWidget {
   const AiOutfitAssistantPage({super.key});
@@ -17,6 +18,7 @@ class _AiOutfitAssistantPageState extends State<AiOutfitAssistantPage> {
   List<ChatMessage> _messages = [];
   bool _isLoading = false;
   bool _isInitialized = false;
+  int _currentCoins = 0;
 
   static const String _assistantName = 'AI Outfit Assistant';
   static const String _assistantAvatar =
@@ -25,11 +27,15 @@ class _AiOutfitAssistantPageState extends State<AiOutfitAssistantPage> {
       'lib/assets/Photo/rot_headericon_2025_6_19.png';
   static const String _chatBg = 'lib/assets/Photo/chat_bg_2025_6_18.png';
   static const String _historyKey = 'ai_outfit_assistant_history';
+  static const String _noMoreRemindKey = 'ai_no_more_remind';
+  static const String kGoldBalanceKey = 'gold_coins_balance';
+  static const int _costPerQuery = 2;
 
   @override
   void initState() {
     super.initState();
     _loadChatHistory();
+    _loadCoinsBalance();
   }
 
   Future<void> _loadChatHistory() async {
@@ -66,6 +72,271 @@ class _AiOutfitAssistantPageState extends State<AiOutfitAssistantPage> {
     await prefs.setString(_historyKey, historyJson);
   }
 
+  Future<void> _loadCoinsBalance() async {
+    final prefs = await SharedPreferences.getInstance();
+    int balance = prefs.getInt(kGoldBalanceKey) ?? -1;
+
+    // 如果是新用户（余额为-1），给予100金币
+    if (balance == -1) {
+      balance = 100;
+      await prefs.setInt(kGoldBalanceKey, balance);
+      print('New user detected, granted 100 coins');
+    }
+
+    setState(() {
+      _currentCoins = balance;
+    });
+  }
+
+  Future<void> _updateCoinsBalance(int newBalance) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(kGoldBalanceKey, newBalance);
+    setState(() {
+      _currentCoins = newBalance;
+    });
+  }
+
+  Future<bool> _checkAndConsumeCoins() async {
+    if (_currentCoins < _costPerQuery) {
+      _showInsufficientCoinsDialog();
+      return false;
+    }
+
+    final prefs = await SharedPreferences.getInstance();
+    final bool noMoreRemind = prefs.getBool(_noMoreRemindKey) ?? false;
+
+    if (!noMoreRemind) {
+      return await _showCoinsConfirmDialog();
+    } else {
+      // 直接消耗金币
+      final newBalance = _currentCoins - _costPerQuery;
+      await _updateCoinsBalance(newBalance);
+      return true;
+    }
+  }
+
+  Future<bool> _showCoinsConfirmDialog() async {
+    bool? result = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        bool dontRemindAgain = false;
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: Row(
+                children: [
+                  Container(
+                    width: 24,
+                    height: 24,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFFD700),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(
+                      Icons.monetization_on,
+                      color: Colors.white,
+                      size: 16,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  const Text(
+                    'Coins Required',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF4B2B3A),
+                    ),
+                  ),
+                ],
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Current Balance: $_currentCoins coins',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF4B2B3A),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'This query will cost $_costPerQuery coins',
+                    style: const TextStyle(
+                      fontSize: 15,
+                      color: Color(0xFF666666),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Checkbox(
+                        value: dontRemindAgain,
+                        onChanged: (value) {
+                          setState(() {
+                            dontRemindAgain = value ?? false;
+                          });
+                        },
+                        activeColor: const Color(0xFFDB64A5),
+                      ),
+                      const Expanded(
+                        child: Text(
+                          'Don\'t remind me again',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Color(0xFF666666),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: const Text(
+                    'Cancel',
+                    style: TextStyle(
+                      color: Color(0xFF666666),
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () async {
+                    if (dontRemindAgain) {
+                      final prefs = await SharedPreferences.getInstance();
+                      await prefs.setBool(_noMoreRemindKey, true);
+                    }
+                    Navigator.of(context).pop(true);
+                  },
+                  child: const Text(
+                    'Continue',
+                    style: TextStyle(
+                      color: Color(0xFFDB64A5),
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+            );
+          },
+        );
+      },
+    );
+
+    if (result == true) {
+      final newBalance = _currentCoins - _costPerQuery;
+      await _updateCoinsBalance(newBalance);
+      return true;
+    }
+    return false;
+  }
+
+  void _showInsufficientCoinsDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            Container(
+              width: 24,
+              height: 24,
+              decoration: BoxDecoration(
+                color: const Color(0xFFFF6B6B),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Icon(
+                Icons.warning,
+                color: Colors.white,
+                size: 16,
+              ),
+            ),
+            const SizedBox(width: 8),
+            const Text(
+              'Insufficient Coins',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF4B2B3A),
+              ),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Current Balance: $_currentCoins coins',
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF4B2B3A),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'You need $_costPerQuery coins to ask AI Outfit Assistant.',
+              style: const TextStyle(
+                fontSize: 15,
+                color: Color(0xFF666666),
+              ),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Please go to Wallet to purchase more coins.',
+              style: TextStyle(
+                fontSize: 15,
+                color: Color(0xFFDB64A5),
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text(
+              'Later',
+              style: TextStyle(
+                color: Color(0xFF666666),
+                fontSize: 16,
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const WalletPage()),
+              ).then((_) => _loadCoinsBalance()); // 重新加载余额
+            },
+            child: const Text(
+              'Go to Wallet',
+              style: TextStyle(
+                color: Color(0xFFDB64A5),
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+      ),
+    );
+  }
+
   void _addMessage(ChatMessage message) {
     setState(() {
       _messages.add(message);
@@ -95,6 +366,11 @@ class _AiOutfitAssistantPageState extends State<AiOutfitAssistantPage> {
     final text = _messageController.text.trim();
     if (text.isEmpty) return;
     if (_isLoading) return;
+
+    // 检查和消耗金币
+    final canProceed = await _checkAndConsumeCoins();
+    if (!canProceed) return;
+
     _messageController.clear();
     final userMessage = ChatMessage(
       text: text,
@@ -196,6 +472,36 @@ class _AiOutfitAssistantPageState extends State<AiOutfitAssistantPage> {
           ],
         ),
         centerTitle: true,
+        actions: [
+          // 显示金币余额
+          Container(
+            margin: const EdgeInsets.only(right: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFFD700),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.monetization_on,
+                  color: Colors.white,
+                  size: 16,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  '$_currentCoins',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
       body: Stack(
         children: [
